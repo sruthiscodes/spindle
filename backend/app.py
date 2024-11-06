@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import sqlite3
 import hashlib
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -131,6 +132,59 @@ def login():
         return jsonify({"message": "Login successful!", "userID": user['userID']})
     else:
         return jsonify({"error": "Invalid email or password!"}), 401
+
+# API to rent a bicycle
+@app.route('/rent_bicycle', methods=['POST'])
+def rent_bicycle():
+    data = request.get_json()
+    userID = data['userID']
+    bicycleID = data['bicycleID']
+
+    conn = get_db_connection()
+    # Check if the bicycle is available
+    bicycle = conn.execute('SELECT * FROM Bicycle WHERE bicycleID = ? AND status = "Available"', (bicycleID,)).fetchone()
+    
+    if bicycle:
+        # Mark bicycle as rented
+        conn.execute('UPDATE Bicycle SET status = "Rented" WHERE bicycleID = ?', (bicycleID,))
+        
+        # Record the rental start time
+        start_time = datetime.now()
+        conn.execute('INSERT INTO Rents (userID, bicycleID, startTime) VALUES (?, ?, ?)', 
+                     (userID, bicycleID, start_time))
+        conn.commit()
+        
+        conn.close()
+        return jsonify({"message": "Bicycle rented successfully!"}), 201
+    else:
+        conn.close()
+        return jsonify({"error": "Bicycle is not available!"}), 400
+
+# API to return a rented bicycle
+@app.route('/return_bicycle', methods=['POST'])
+def return_bicycle():
+    data = request.get_json()
+    rentID = data['rentID']
+    
+    conn = get_db_connection()
+    
+    # Fetch the rental details
+    rental = conn.execute('SELECT * FROM Rents WHERE rentID = ?', (rentID,)).fetchone()
+    
+    if rental:
+        # Mark bicycle as available
+        conn.execute('UPDATE Bicycle SET status = "Available" WHERE bicycleID = ?', (rental['bicycleID'],))
+        
+        # Record the rental end time
+        end_time = datetime.now()
+        conn.execute('UPDATE Rents SET endTime = ? WHERE rentID = ?', (end_time, rentID))
+        conn.commit()
+        
+        conn.close()
+        return jsonify({"message": "Bicycle returned successfully!"}), 200
+    else:
+        conn.close()
+        return jsonify({"error": "Rental record not found!"}), 400
 
 if __name__ == "__main__":
     create_tables()  # Create tables at startup
