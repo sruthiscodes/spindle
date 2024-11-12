@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('./static/bicycle1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        .dashboard-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 60px;
+            border-radius: 15px;
+            text-align: center;
+            width: 500px;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.8em;
+            cursor: pointer;
+            border-radius: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .link a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Welcome to Your Dashboard</h1>
+        <button onclick="location.href='/available_bikes'">View Available Bikes</button>
+        <button onclick="location.href='/rented_bikes'">View Rented Bikes</button>
+        <button onclick="location.href='/add_bike'">Add Your Bike for Rent</button>
+        <div class="link">
+            <p><a href="/logout">Logout</a></p>
+        </div>
+    </div>
+</body>
+</html>

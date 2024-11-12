@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('./static/bicycle1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 50px;
+            border-radius: 15px;
+            text-align: center;
+            width: 500px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        input[type="text"], input[type="password"], input[type="email"], input[type="date"] {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 18px;
+            background-color: #28a745;
+            color: white;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .link a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: #ff4d4d;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sign Up</h2>
+        <form id="signup-form">
+            <input type="text" id="name" name="name" placeholder="Full Name" required>
+            <input type="email" id="emailID" name="emailID" placeholder="Email" required>
+            <input type="text" id="phoneNo" name="phoneNo" placeholder="Phone Number" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <input type="date" id="DOB" name="DOB" placeholder="Date of Birth" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="link">
+            <a href="login">Already have an account? Login</a>
+        </div>
+        <div id="error-message" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Handle the sign-up form submission
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();  // Prevent the default form submission
+
+            // Get form data
+            const name = document.getElementById('name').value;
+            const emailID = document.getElementById('emailID').value;
+            const phoneNo = document.getElementById('phoneNo').value;
+            const password = document.getElementById('password').value;
+            const DOB = document.getElementById('DOB').value;
+
+            // Clear previous error message
+            document.getElementById('error-message').style.display = 'none';
+
+            // Send the data to the Flask backend using fetch
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    emailID: emailID,
+                    phoneNo: phoneNo,
+                    password: password,
+                    DOB: DOB
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // If registration is successful, redirect to the login page
+                    alert(data.message);  // You can also show a success message
+                    window.location.href = '/login';  // Redirect to login page
+                } else {
+                    // If there is an error (e.g., email already exists), show the error message
+                    document.getElementById('error-message').textContent = data.error;
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show a general error message in case of network or server failure
+                document.getElementById('error-message').textContent = 'An error occurred. Please try again later.';
+                document.getElementById('error-message').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
