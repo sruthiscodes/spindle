@@ -192,16 +192,29 @@ def login_user():
     
     try:
         user = conn.execute('SELECT * FROM Users WHERE EmailID = ?', (emailID,)).fetchone()
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['Password'].encode('utf-8')):
+        
+        # Ensure that the password from the database is in bytes form
+        stored_password = user['Password']  # This will already be a hashed password in bytes
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), stored_password):
             return jsonify({"message": "Login successful!", "userID": user['UserID']})
         else:
             return jsonify({"error": "Invalid email or password!"}), 401
+    except sqlite3.Error as e:
+        # Log the SQLite error for debugging
+        print(f"SQL error during login: {e}")
+        return jsonify({"error": "An error occurred while logging in. Please try again later."}), 500
+    except TypeError as e:
+        # Handle the 'bytes' object error
+        print(f"Type error during login: {e}")
+        return jsonify({"error": "An error occurred while logging in. Please check your credentials and try again."}), 400
     except Exception as e:
-        # Log the error for debugging
-        print(f"Error during login: {e}")
-        return jsonify({"error": "An error occurred. Please try again later."}), 500
+        # Log any other unexpected errors for debugging
+        print(f"Unexpected error during login: {e}")
+        return jsonify({"error": "An error occurred while logging in. Please try again later."}), 500
     finally:
         conn.close()
+
 
 
 # API to get available bikes
