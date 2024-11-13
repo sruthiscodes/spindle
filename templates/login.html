@@ -86,7 +86,7 @@
             <button type="submit">Login</button>
         </form>
         <div class="link">
-            <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+            <p>Don't have an account? Sign Up</a></p>
         </div>
         <div id="error-message" class="error" style="display: none;"></div>
     </div>
@@ -118,7 +118,7 @@
                 if (data.message) {
                     // If login is successful, redirect to page1
                     alert(data.message);
-                    window.location.href = '/page1';  // Redirect to a different page after successful login
+                    window.location.href = '/dashboard';  // Redirect to a different page after successful login
                 } else {
                     // Display error message if login fails
                     document.getElementById('error-message').textContent = data.error;

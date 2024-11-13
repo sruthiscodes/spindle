@@ -3,75 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>Bicycle Rental Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: url('./static/bicycle1.jpg') no-repeat center center fixed;
+            background: url('./bicycle.jpg') no-repeat center center fixed;
             background-size: cover;
             margin: 0;
             padding: 0;
+            color: #fff;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: white;
-        }
-
-        .dashboard-container {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 60px;
-            border-radius: 15px;
-            text-align: center;
-            width: 500px;
+            flex-direction: column;
         }
 
         h1 {
-            font-size: 3.5em;
-            margin-bottom: 30px;
+            text-align: center;
+            font-size: 4.5em;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin-bottom: 40px;
+        }
+
+        .dashboard-buttons {
+            display: flex;
+            justify-content: space-around;
+            width: 50%;
+            max-width: 600px;
+        }
+
+        .dashboard-buttons a {
+            text-decoration: none;
         }
 
         button {
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 18px;
-            font-size: 1.8em;
+            border-radius: 5px;
+            padding: 20px;
             cursor: pointer;
-            border-radius: 10px;
+            font-size: 1.5em;
             width: 100%;
-            margin-bottom: 15px;
         }
 
         button:hover {
             background-color: #218838;
         }
 
-        .link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 1.2em;
+        .rent-button {
+            background-color: #007bff;
         }
 
-        .link a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .link a:hover {
-            text-decoration: underline;
+        .rent-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <h1>Welcome to Your Dashboard</h1>
-        <button onclick="location.href='/available_bikes'">View Available Bikes</button>
-        <button onclick="location.href='/rented_bikes'">View Rented Bikes</button>
-        <button onclick="location.href='/add_bike'">Add Your Bike for Rent</button>
-        <div class="link">
-            <p><a href="/logout">Logout</a></p>
-        </div>
+    <h1>Bicycle Rental Dashboard</h1>
+    <div class="dashboard-buttons">
+        <a href="/rent"><button class="rent-button">Rent a Bicycle</button></a>
+        <a href="/give_rent"><button>Give Bicycle for Rent</button></a>
     </div>
 </body>
 </html>
