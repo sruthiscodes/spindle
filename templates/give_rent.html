@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Give Bicycle for Rent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('./bicycle.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 4.5em;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin-bottom: 40px;
+        }
+
+        .add-bike-form {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            width: 40vw;
+            max-width: 500px;
+            min-width: 300px;
+        }
+
+        .add-bike-form input {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 100%;
+            font-size: 1.2em;
+        }
+
+        .add-bike-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .add-bike-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Give Your Bike for Rent</h1>
+    <div class="add-bike-form">
+        <form id="addBikeForm">
+            <input type="text" id="bikeName" placeholder="Bike Name" required><br>
+            <input type="text" id="bikeType" placeholder="Bike Type" required><br>
+            <input type="text" id="bikeLocation" placeholder="Location" required><br>
+            <input type="number" id="bikePrice" placeholder="Price per Hour (Rs)" required><br>
+            <button type="submit">Add Bike for Rent</button>
+        </form>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('addBikeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get form data
+            const bikeName = document.getElementById('bikeName').value;
+            const bikeType = document.getElementById('bikeType').value;
+            const bikeLocation = document.getElementById('bikeLocation').value;
+            const bikePrice = document.getElementById('bikePrice').value;
+
+            // Simple validation
+            if (!bikeName || !bikeType || !bikeLocation || !bikePrice) {
+                alert('Please fill in all fields!');
+                return;
+            }
+
+            // Assuming you have the userID available (either from a global JS variable or session)
+            const userID = "example-user-id"; // Replace with actual userID
+
+            // Create bikeData object
+            const bikeData = {
+                userID: userID,
+                location: bikeLocation,
+                gear: {
+                    name: bikeName,
+                    type: bikeType,
+                    price: bikePrice,
+                }
+            };
+
+            // Send data to Flask backend
+            fetch('/give_rent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bikeData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Bike added successfully:', data);
+                alert('Your bike has been added for rent!');
+                // Clear the form after submission
+                document.getElementById('addBikeForm').reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>
