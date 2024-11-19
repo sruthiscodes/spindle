@@ -80,8 +80,8 @@
 <body>
     <div class="login-container">
         <h1>Login</h1>
-        <form id="login-form">
-            <input type="email" id="email" name="email" placeholder="Email" required>
+        <form id="loginForm">
+            <input type="email" id="emailID" name="emailID" placeholder="Email" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
@@ -92,42 +92,42 @@
     </div>
 
     <script>
-        // Handle the login form submission
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent the default form submission
-    
-            var email = document.getElementById('email').value;
-            var password = document.getElementById('password').value;
-    
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const emailID = document.getElementById('emailID').value;
+            const password = document.getElementById('password').value;
+
             // Clear previous error messages
             document.getElementById('error-message').style.display = 'none';
-    
-            // Send the login data to the Flask backend using fetch
+
             fetch('/login_user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    emailID: email,
+                    emailID: emailID,
                     password: password
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message) {
-                    // If login is successful, redirect to page1
-                    alert(data.message);
-                    window.location.href = '/dashboard';  // Redirect to a different page after successful login
+                if (data.message === "Login successful!") {
+                    // Save userID in both localStorage and sessionStorage
+                    localStorage.setItem('userID', data.userID);
+                    sessionStorage.setItem('userID', data.userID);
+                    
+                    // Redirect to dashboard
+                    window.location.href = '/dashboard';
                 } else {
                     // Display error message if login fails
-                    document.getElementById('error-message').textContent = data.error;
+                    document.getElementById('error-message').textContent = data.error || 'Login failed';
                     document.getElementById('error-message').style.display = 'block';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                // Display a general error message in case of any network or server error
                 document.getElementById('error-message').textContent = 'An error occurred. Please try again later.';
                 document.getElementById('error-message').style.display = 'block';
             });

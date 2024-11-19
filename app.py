@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import sqlite3
 import bcrypt
@@ -189,11 +189,11 @@ def login_user():
         user = conn.execute('SELECT * FROM Users WHERE EmailID = ?', (emailID,)).fetchone()
 
         if user and bcrypt.checkpw(password.encode('utf-8'), user['Password']):
-            return jsonify({"message": "Login successful!", "userID": user['UserID']}), 200
+            response = {"message": "Login successful!", "userID": user['UserID']}
+            return jsonify(response), 200
         else:
             return jsonify({"error": "Invalid email or password!"}), 401
     except Exception as e:
-        print(f"Error: {e}")
         return jsonify({"error": "Login failed due to an internal error."}), 500
     finally:
         conn.close()
@@ -252,36 +252,46 @@ def give_rent():
     except Exception as e:
         return jsonify({"error": f"Error occurred: {str(e)}"}), 500
 
-# API to handle payment submission
-@app.route('/make_payment', methods=['POST'])
-def make_payment():
+@app.route('/rent_bike', methods=['POST'])
+def rent_bike():
     data = request.get_json()
 
-    # Validate required fields
-    required_fields = ['userID', 'rentalID', 'cardNumber', 'amount']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"error": f"Missing field: {field}"}), 400
+    # Extract data from the request
+    user_id = data.get('userID')
+    bicycle_id = data.get('bicycleID')
 
-    userID = data['userID']
-    rentalID = data['rentalID']
-    cardNumber = data['cardNumber'][-4:]  # Store only the last 4 digits of the card number
-    amount = data['amount']
+    if not user_id or not bicycle_id:
+        return jsonify({"error": "Missing userID or bicycleID"}), 400
 
     conn = get_db_connection()
+
     try:
-        paymentID = str(uuid.uuid4())
-        conn.execute(
-            '''
-            INSERT INTO Payments (PaymentID, UserID, RentalID, Amount, PaymentDate, CardNumber) 
-            VALUES (?, ?, ?, ?, ?, ?)
-            ''', 
-            (paymentID, userID, rentalID, amount, datetime.now(), cardNumber)
-        )
+        # Check if the user exists
+        user = conn.execute('SELECT * FROM Users WHERE UserID = ?', (user_id,)).fetchone()
+        if not user:
+            return jsonify({"error": "User does not exist!"}), 400
+
+        # Check if the bike is available
+        bike = conn.execute('SELECT * FROM Bicycle WHERE BicycleID = ? AND Status = "Available"', (bicycle_id,)).fetchone()
+        if not bike:
+            return jsonify({"error": "Bike is not available for rent!"}), 400
+
+        # Update the bicycle status to rented
+        conn.execute('UPDATE Bicycle SET Status = "Rented", UserID = ? WHERE BicycleID = ?', (user_id, bicycle_id))
         conn.commit()
-        return jsonify({"message": "Payment successful!"}), 201
+
+        # Log the rental start time
+        rental_id = str(uuid.uuid4())
+        conn.execute('INSERT INTO Rents (RentalID, UserID, BicycleID, StartTime) VALUES (?, ?, ?, ?)',
+                     (rental_id, user_id, bicycle_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+
+        return jsonify({"message": "Bike rented successfully!", "rentalID": rental_id}), 200
+    except sqlite3.Error as e:
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
     finally:
         conn.close()
+
 
 # Run the app
 if __name__ == '__main__':

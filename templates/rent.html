@@ -96,13 +96,96 @@
             <h2>Your Rentals</h2>
             <ul id="rentedBikes"></ul>
             <div class="total-cost" id="totalCost">Total Cost: Rs 0.00</div>
+            <button id="confirmRentBtn" style="display:none;" onclick="confirmRent()">Confirm Rent</button>
         </div>
     </div>
 
     <script>
-        // Use the JavaScript code from the original file to display and manage bikes.
-        // fetchAvailableBikes, rentBike, returnBike, displayBikes, and updateTotalCost functions go here.
-        displayBikes();
+        let selectedBikeID = null;
+        let totalCost = 0;
+
+        function displayBikes() {
+            fetch('/bicycles')
+            .then(response => response.json())
+            .then(data => {
+                const availableBikes = document.getElementById('availableBikes');
+                availableBikes.innerHTML = ''; // Clear the list before adding new bikes
+                
+                data.forEach(bike => {
+                    const li = document.createElement('li');
+                    const gear = JSON.parse(bike.Gear); // Parse the Gear field
+                    
+                    li.innerHTML = `${gear.name} (${gear.type}) - Rs ${gear.price}/hr at ${bike.Location} 
+                                    <button onclick="calculateRent('${bike.BicycleID}')">Rent</button>`;
+                    availableBikes.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching available bikes:', error);
+            });
+        }
+    
+        // Mock current user ID (replace with actual userID logic)
+        const currentUserID = localStorage.getItem('userID') || 'test-user-123';
+
+        function calculateRent(bicycleID) {
+            fetch('/calculate_rent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userID: currentUserID,
+                    bicycleID: bicycleID
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    totalCost = data.totalCost;
+                    selectedBikeID = data.bikeID;
+                    document.getElementById('totalCost').innerHTML = `Total Cost: Rs ${totalCost.toFixed(2)}`;
+                    document.getElementById('confirmRentBtn').style.display = 'block';
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating rent:', error);
+            });
+        }
+
+        function confirmRent() {
+            fetch('/confirm_rent_bike', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userID: currentUserID,
+                    bicycleID: selectedBikeID
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Bike rented successfully!');
+                    document.getElementById('totalCost').innerHTML = 'Total Cost: Rs 0.00';
+                    document.getElementById('confirmRentBtn').style.display = 'none';
+                    displayBikes();  // Refresh available bikes after rent
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error confirming rent:', error);
+            });
+        }
+
+        // Display bikes when page loads
+        window.onload = function() {
+            displayBikes();
+        };
     </script>
 </body>
 </html>
